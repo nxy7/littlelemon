@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section>
+  <article>
+    <h1>Make a reservation</h1>
+    <!--Begin row-->
+    <div class="row">
+      <!--Begin col-->
+      <div class="column">
+        <form id="book_form" action="/api/booking/" method="post">
+          {% csrf_token %}
+          {{form.as_p}}
+          <input type="submit" id="button">
+        </form>
+      </div>
+      <!--End col-->
+
+      <!--Begin col-->
+      <div class="column">
+        <h2 id="datefor">
+          <!-- Select booking date -->
+        </h2>
+
+        <div id="datefor_content">
+
+        </div>
+      </div>
+      <!--End col-->
+    </div>
+    <!--End row-->
+
+
+    <script>
+      function ChangeDatefor(el, date) {
+        let text = date.toString()
+        if (text == "") {
+          text = "Select booking date"
+        } else {
+          text = "Bookings for " + text
+          fetch('/api/booking/?date=' + date.toString()).then(res => res.json()).then((r) => {
+            console.log(r)
+            let html = ""
+            r.forEach((el) => {
+              html += `<div>${el.first_name} ${el.last_name} ${el.reservation_slot} ${el.reservation_slot>12?"PM":"AM"}</div>`
+            })
+            document.getElementById("datefor_content").innerHTML = html
+
+            let options = Array.apply(null, reservationSlots.options)
+            options.forEach(option => {
+              if (r.find((el) => el.reservation_slot == option.value) != undefined){
+                option.disabled = true
+              }
+            })
+          })
+          
+        }
+        el.innerText = text
+      }
+      let form = document.getElementById('book_form')
+      form.addEventListener('submit',
+        function(e) {
+                e.preventDefault()
+                let formData = new FormData(form)
+                // console.log(formData)
+                fetch('/api/booking/', {
+                  method: "POST",
+                  body: formData
+                }).then(r => {
+                  if (r.status == 201){
+                    location.reload()
+                  } else {
+                    console.log(r)
+                  }
+                })
+              }
+      )
+        let pickedDate = document.getElementById('id_reservation_date')
+      let datefor = document.getElementById('datefor')
+      let reservationSlots = document.getElementById('id_reservation_slot')
+
+      ChangeDatefor(datefor, pickedDate.value)
+      
+
+
+      // console.log(pickedDate.value)
+      pickedDate.onchange = function(e){
+        ChangeDatefor(datefor, e.target.value)
+      }
+
+
+
+    </script>
+
+  </article>
+</section>
+{% endblock %}

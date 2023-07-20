@@ -1,0 +1,11 @@
+services:
+  db:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      # MYSQL_USER: root
+      MYSQL_DATABASE: db
+      # MYSQL_PASSWORD: rootpass
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
